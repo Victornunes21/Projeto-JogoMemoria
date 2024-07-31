@@ -1,24 +1,81 @@
-const cards = document.querySelectorAll('.memory-card');
+const cardsArray = [
+  { name: 'A', symbol: '7' },
+  { name: 'A', symbol: '7' },
+  { name: 'B', symbol: '6' },
+  { name: 'B', symbol: '6' },
+  { name: 'C', symbol: '4' },
+  { name: 'C', symbol: '4' },
+  { name: 'D', symbol: '2' },
+  { name: 'D', symbol: '2' },
+  { name: 'E', symbol: '1' },
+  { name: 'E', symbol: '1' },
+  { name: 'F', symbol: '3' },
+  { name: 'F', symbol: '3' },
+  { name: 'G', symbol: '8' },
+  { name: 'G', symbol: '8' },
+  { name: 'H', symbol: '5' },
+  { name: 'H', symbol: '5' },
+];
 
-function flipCard() {
-  this.classList.toggle('flip');
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+
+document.addEventListener('DOMContentLoaded', createBoard);
+
+function shuffle(array) {
+  array.sort(() => 0.5 - Math.random());
 }
 
-cards.forEach(card => card.addEventListener('click', flipCard));
+function createBoard() {
+  shuffle(cardsArray);
+  const gameBoard = document.getElementById('game-board');
+  gameBoard.innerHTML = '';
 
-const cards = document.querySelectorAll('.memory-card');
+  cardsArray.forEach(card => {
+      const cardElement = document.createElement('div');
+      cardElement.classList.add('card');
+      cardElement.setAttribute('data-name', card.name);
+      cardElement.setAttribute('data-symbol', card.symbol);
+      cardElement.addEventListener('click', flipCard);
+      gameBoard.appendChild(cardElement);
+  });
+}
 
-let hasFlippedCard = false;
-let firstCard, secondCard;
+function flipCard() {
+  if (lockBoard) return;
+  if (this === firstCard) return;
 
- function flipCard() {
-  this.classList.toggle('flip');
-  this.classList.add('flip');
+  this.classList.add('flipped');
+  this.textContent = this.getAttribute('data-symbol');
 
-  if (!hasFlippedCard) {
-    hasFlippedCard = true;
-    firstCard = this;
+  if (!firstCard) {
+      firstCard = this;
+      return;
   }
- }
 
-cards.forEach(card => card.addEventListener('click', flipCard));
+  secondCard = this;
+  checkForMatch();
+}
+
+function checkForMatch() {
+  if (firstCard.getAttribute('data-name') === secondCard.getAttribute('data-name')) {
+      resetCards();
+  } else {
+      lockBoard = true;
+      setTimeout(unflipCards, 1000);
+  }
+}
+
+function unflipCards() {
+  firstCard.classList.remove('flipped');
+  secondCard.classList.remove('flipped');
+  firstCard.textContent = '';
+  secondCard.textContent = '';
+  resetCards();
+}
+
+function resetCards() {
+  [firstCard, secondCard] = [null, null];
+  lockBoard = false;
+}
